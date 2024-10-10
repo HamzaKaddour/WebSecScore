@@ -1,4 +1,5 @@
 import requests
+from Services import utilities
 
 # DNS and VirusTotal Score
 
@@ -9,7 +10,7 @@ def findVirusTotalResult(domain):
         "dns": None
     }
     try:
-        headers = {"x-apikey": "0962e29cb20fb8983790150e256a76e7ba1b93f3e2ed6c6fe663284c03172711"}
+        headers = {"x-apikey": utilities.getEnvironmentVariable('VIRUSTOTAL')}
         response = requests.get("https://www.virustotal.com/api/v3/domains/" + domain, headers=headers)
         core = response.json()
         result = {
