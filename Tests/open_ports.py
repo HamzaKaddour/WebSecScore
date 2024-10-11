@@ -24,12 +24,6 @@ def scanOpenPorts(domain):
                 port = line.split("/")[0]
                 open_ports.append(port)  # Add the open port to the list
 
-        # Print the list of open ports
-        # print("Open ports:", open_ports)
-
-        # Print the raw output from Nmap
-        # print(result.stdout)
-
     except subprocess.CalledProcessError as e:
         print(f"Nmap command failed with error: {e}")
         print(f"Error output: {e.stderr}")

@@ -1,8 +1,7 @@
 import subprocess
 import json
 
-# The target URL to scan
-# url = "http://google.com"
+
 def vulnerabilityFinder(domain):
     res = {}
     # Command to execute Wapiti with JSON output

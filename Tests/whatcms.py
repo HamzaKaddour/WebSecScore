@@ -3,28 +3,6 @@ import json
 import requests
 
 from Services import utilities
-# logging = logging.LogWrapper(__name__)
-
-
-
-# class InvalidHIBPException(Exception):
-#     pass
-
-# def triggerScan(dbConnection, sSiteName, scanBlob, filenames):
-#     outputFilename = filenames["output"]
-#     resultFilename = filenames["result"]
-#     dependenciesPath = filenames["dependencies"]
-
-#     startCMSChecks(sSiteName, outputFilename)
-#     successfulScan = database.storeScan(dbConnection, scanBlob, outputFilename)
-
-#     verifyWhatCMSResults(outputFilename, resultFilename, dependenciesPath)
-#     successfulResult = database.storeCheck(dbConnection, scanBlob, resultFilename)
-
-#     if (successfulScan and successfulResult):
-#         return True
-#     else:
-#         return False
 
 
 def startCMSChecks(url):
