@@ -48,4 +48,4 @@ def checkCompromisedURL(domain):
 # print(checkCompromisedURL("http://sskymedia.com/VMYB-ht_JAQo-gi/INV/99401FORPO/20673114777/US/Outstanding-Invoices/"))
 
 # print(utilities.hostname_to_ip("http://sskymedia.com/VMYB-ht_JAQo-gi/INV/99401FORPO/20673114777/US/Outstanding-Invoices/"))
-print(checkCompromisedURL("google.com"))
+# print(checkCompromisedURL("google.com"))
