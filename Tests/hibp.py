@@ -1,21 +1,33 @@
 import requests
 
 
-def firstInit():
+def checkHIBP(domain):
     """
     This function is called on the first time to bring the hibp breach data and store in DB
     
     """
-    url = "https://haveibeenpwned.com/api/v3/breaches"
-    res = requests.get(url)
+    result = []
+    try:
+        url = "https://haveibeenpwned.com/api/v3/breaches"
+        res = requests.get(url)
 
-    print(res.content)
-
+        if res.status_code == 200:
+            content = res.json()
+            for element in content:
+                if element["Domain"] == domain:
+                    result.append(element)
+                    
+         
+    except Exception as e:
+        print(e)
+    finally:
+        return result
+            
 def updateHIBP():
     url = "https://haveibeenpwned.com/api/v3/latestbreach"
     res = requests.get(url)
 
-    print(res.content)
+    return res.json()
     
     
-updateHIBP()
+# print(checkHIBP("google.com"))

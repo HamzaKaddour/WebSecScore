@@ -2,7 +2,7 @@
 
 import requests
 # import Services.utilities
-from Services import utilities
+from Tests.Services import utilities
 
 def checkCompromisedURL(domain):
     result = {
