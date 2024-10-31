@@ -1,5 +1,6 @@
 import requests
-from Services import tools
+# from Services import utilities
+from Tests.Services import utilities
 
 # DNS and VirusTotal Score
 
@@ -7,7 +8,8 @@ from Services import tools
 def findVirusTotalResult(domain):
     result = {
         "virusTotalScore": None,
-        "dns": None
+        "dns": None,
+        "communityScore" : None
     }
     try:
         headers = {"x-apikey": tools.getEnvironmentVariable('VIRUSTOTAL')}
@@ -15,11 +17,12 @@ def findVirusTotalResult(domain):
         core = response.json()
         result = {
         "virusTotalScore": core["data"]["attributes"]["last_analysis_stats"],
-        "dns": core["data"]["attributes"]["last_dns_records"]
+        "dns": core["data"]["attributes"]["last_dns_records"],
+        "communityScore" : core["data"]["attributes"]["reputation"]
     }
     except Exception as e:
         print(e)
     finally:
         return result
     
-print(findVirusTotalResult("google.com"))
+# print(findVirusTotalResult("google.com"))

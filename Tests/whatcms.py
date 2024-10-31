@@ -2,7 +2,7 @@
 import json
 import requests
 
-from Services import utilities
+from Tests.Services import utilities
 
 
 def startCMSChecks(url):
@@ -24,5 +24,5 @@ def startCMSChecks(url):
         print(e)
         jsonResult = {"WhatCMS_Scan": "Failed", "FailReason": "No address associated with hostname"}   
 
-print(startCMSChecks('wordpress.com'))
+# print(startCMSChecks('wordpress.com'))
 

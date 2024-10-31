@@ -40,4 +40,4 @@ def vulnerabilityFinder(domain):
         return res
     
     
-print(vulnerabilityFinder("http://facebook.com"))
+# print(vulnerabilityFinder("http://facebook.com"))
