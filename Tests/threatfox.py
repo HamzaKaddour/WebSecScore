@@ -20,8 +20,8 @@ def checkCompromisedURL(domain):
     url = "https://threatfox-api.abuse.ch/api/v1/"
     data = {
     "query": "search_ioc",
-    # "search_term": ip_addr
-    "search_term": "139.180.203.104"
+    "search_term": ip_addr
+    # "search_term": "139.180.203.104"
     }
 
     
