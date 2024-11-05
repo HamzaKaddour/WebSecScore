@@ -5,6 +5,7 @@ from Tests import threatfox as COMPROMIZE
 from Tests import virusTotal as VT
 from Tests import vul_wapiti as VUL
 from Tests import whatcms as CMS
+from Tests import csa as CSA
 # from WebSecScore.Tests import 
 import requests
 
@@ -15,7 +16,7 @@ ADD THE REGEX OF THE DOMAIN SO THAT IT TAKES DIFFERENT COMBINIZATIONS OF THE DOM
 
 
 
-def testingResults(domain):
+def testingDomainResults(domain):
     result = {
         "HIBP" : None, 
         "MALWARE" : None, 
@@ -24,6 +25,7 @@ def testingResults(domain):
         "VIRUSTOTAL" : None, 
         "WAPITI" : None, 
         "CMS" : None, 
+        "CSA" : None
     }
     
     try:
@@ -34,6 +36,7 @@ def testingResults(domain):
         result["VIRUSTOTAL"] = VT.findVirusTotalResult(domain)
         result["WAPITI"] = VUL.vulnerabilityFinder(domain)
         result["CMS"] = CMS.startCMSChecks(domain)
+        result["CSA"] = CSA.checkCSAexists(domain)
         
         
     except Exception as e:
@@ -42,6 +45,15 @@ def testingResults(domain):
     finally:
         return result
 
+
+def enterpriseNameResults(name):
+    result = {"CSA" : None}
+    try:
+        result["CSA"] = CSA.checkCSAexists(name)
+    except Exception as e:
+        print(e)
+    finally:
+        return result
 
 def scoreResults(testingRes):
     
@@ -66,15 +78,29 @@ def scoreResults(testingRes):
     
     try:
         score = 0
-        if testingRes["HIBP"]:
-            score += weights["HIBP"]
-        print()
+        penalty = 0
+        for testType in ["HIBP", "CMS", "WAPITI", "OPEN_PORTS"]:
+            if testingRes[testType]:
+                penalty += weights[testType]
+        if testingRes["THREATFOX"]["isCompromised"] == 1:
+            penalty += weights["THREATFOX"]
+            
+        if testingRes["MALWARE"]["isMalware"] == 1:
+            penalty += weights["MALWARE"]
+        
+        if testingRes["VIRUSTOTAL"]["virusTotalScore"]:
+            penalty += weights["VIRUSTOTAL"]
+        
+        score = (1 - penalty) * 100
+        score = round(score, 2)
         
     except Exception as e:
         print(e)
         
     finally:
         return score
-    
-testres = testingResults("google.com")
+
+
+
+testres = testingDomainResults("myetherevvalliet.com")
 print(scoreResults(testres))
