@@ -16,7 +16,7 @@ ADD THE REGEX OF THE DOMAIN SO THAT IT TAKES DIFFERENT COMBINIZATIONS OF THE DOM
 
 
 
-def testingDomainResults(domain):
+def testingDomainResults(domain, name = None):
     result = {
         "HIBP" : None, 
         "MALWARE" : None, 
@@ -36,8 +36,9 @@ def testingDomainResults(domain):
         result["VIRUSTOTAL"] = VT.findVirusTotalResult(domain)
         result["WAPITI"] = VUL.vulnerabilityFinder(domain)
         result["CMS"] = CMS.startCMSChecks(domain)
-        result["CSA"] = CSA.checkCSAexists(domain)
         
+        if name:
+            result["CSA"] = CSA.checkCSAexists(name)
         
     except Exception as e:
         print(e)
@@ -46,14 +47,14 @@ def testingDomainResults(domain):
         return result
 
 
-def enterpriseNameResults(name):
-    result = {"CSA" : None}
-    try:
-        result["CSA"] = CSA.checkCSAexists(name)
-    except Exception as e:
-        print(e)
-    finally:
-        return result
+# def enterpriseNameResults(name):
+#     result = {"CSA" : None}
+#     try:
+#         result["CSA"] = CSA.checkCSAexists(name)
+#     except Exception as e:
+#         print(e)
+#     finally:
+#         return result
 
 def scoreResults(testingRes):
     
@@ -102,5 +103,5 @@ def scoreResults(testingRes):
 
 
 
-testres = testingDomainResults("myetherevvalliet.com")
+testres = testingDomainResults("myetherevvalliet.com", "ZSCALER")
 print(scoreResults(testres))
