@@ -36,7 +36,7 @@
 import socket
 
 def scan_open_ports(domain):
-    ports = [21, 22, 23, 25, 53, 80, 110, 135, 143, 443, 445, 3306, 3389]
+    ports = [21, 22, 23, 25, 53, 110, 135, 143, 445, 3306, 3389] # Excluded 80 and 443 to be open usually safely
     open_ports = []
     for port in ports:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
