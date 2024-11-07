@@ -13,7 +13,7 @@ def findVirusTotalResult(domain):
         "communityScore" : None
     }
     try:
-        headers = {"x-apikey": tools.getEnvironmentVariable('VIRUSTOTAL')}
+        headers = {"x-apikey": utilities.getEnvironmentVariable('VIRUSTOTAL')}
         response = requests.get("https://www.virustotal.com/api/v3/domains/" + domain, headers=headers)
         core = response.json()
         result = {

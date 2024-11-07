@@ -6,7 +6,7 @@ from Tests.Services import utilities
 
 
 def startCMSChecks(url):
-    global data
+    # global data
 
     try:
         

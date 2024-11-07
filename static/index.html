@@ -1,0 +1,194 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Scanner</title>
+    <style>
+        /* Basic styling */
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: auto; padding: 20px; }
+        .result-box { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Domain Scanner</h1>
+        <label for="scan-type">Select Scan Type:</label>
+        <select id="scan-type" onchange="toggleEnterpriseFields()">
+            <option value="standard">Standard Scan</option>
+            <option value="enterprise">Enterprise Scan</option>
+        </select>
+        
+        <div>
+            <label for="domain">Domain:</label>
+            <input type="text" id="domain" required>
+        </div>
+        
+        <div id="enterprise-fields" style="display: none;">
+            <label for="company-name">Company Name (Enterprise Scan only):</label>
+            <input type="text" id="company-name">
+        </div>
+        
+        <button onclick="runScan()">Run Scan</button>
+
+        <div id="result" class="result-box" style="display: none;">
+            <h2>Scan Result</h2>
+            <pre id="result-details"></pre>
+            <p>Scan Score: <span id="result-score"></span></p>
+        </div>
+    </div>
+
+    <script>
+        function toggleEnterpriseFields() {
+            const scanType = document.getElementById('scan-type').value;
+            document.getElementById('enterprise-fields').style.display = scanType === 'enterprise' ? 'block' : 'none';
+        }
+
+        function runScan() {
+            const scanType = document.getElementById('scan-type').value;
+            const domain = document.getElementById('domain').value;
+            const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
+            
+            if (!domain) {
+                alert("Please enter a domain.");
+                return;
+            }
+
+            const data = { domain: domain };
+            if (companyName) data.companyName = companyName;
+
+            fetch('/scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Display result in the HTML
+                document.getElementById('result-details').textContent = JSON.stringify(result.scanDetails, null, 2);
+                document.getElementById('result-score').textContent = result.scanScore;
+                document.getElementById('result').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Scanner</title>
+    <style>
+        /* Basic styling */
+        body { font-family: Arial, sans-serif; }
+        .container { max-width: 600px; margin: auto; padding: 20px; }
+        .result-box { margin-top: 20px; padding: 10px; border: 1px solid #ccc; }
+
+        /* Loading spinner styles */
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: none; /* Hide by default */
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Domain Scanner</h1>
+        <label for="scan-type">Select Scan Type:</label>
+        <select id="scan-type" onchange="toggleEnterpriseFields()">
+            <option value="standard">Standard Scan</option>
+            <option value="enterprise">Enterprise Scan</option>
+        </select>
+        
+        <div>
+            <label for="domain">Domain:</label>
+            <input type="text" id="domain" required>
+        </div>
+        
+        <div id="enterprise-fields" style="display: none;">
+            <label for="company-name">Company Name (Enterprise Scan only):</label>
+            <input type="text" id="company-name">
+        </div>
+        
+        <button onclick="runScan()">Run Scan</button>
+
+        <!-- Loading spinner -->
+        <div id="loader" class="loader"></div>
+
+        <div id="result" class="result-box" style="display: none;">
+            <h2>Scan Result</h2>
+            <pre id="result-details"></pre>
+            <p>Scan Score: <span id="result-score"></span></p>
+        </div>
+    </div>
+
+    <script>
+        function toggleEnterpriseFields() {
+            const scanType = document.getElementById('scan-type').value;
+            document.getElementById('enterprise-fields').style.display = scanType === 'enterprise' ? 'block' : 'none';
+        }
+
+        function showLoading() {
+            document.getElementById('loader').style.display = 'block';
+        }
+
+        function hideLoading() {
+            document.getElementById('loader').style.display = 'none';
+        }
+
+        function runScan() {
+            const scanType = document.getElementById('scan-type').value;
+            const domain = document.getElementById('domain').value;
+            const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
+            
+            if (!domain) {
+                alert("Please enter a domain.");
+                return;
+            }
+
+            const data = { domain: domain };
+            if (companyName) data.companyName = companyName;
+
+            showLoading();  // Show loading spinner
+
+            fetch('/scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                // Hide loading spinner
+                hideLoading();
+
+                // Display result in the HTML
+                document.getElementById('result-details').textContent = JSON.stringify(result.scanDetails, null, 2);
+                document.getElementById('result-score').textContent = result.scanScore;
+                document.getElementById('result').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                hideLoading(); // Hide loading spinner if there's an error
+            });
+        }
+    </script>
+</body>
+</html>

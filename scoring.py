@@ -6,6 +6,7 @@ from Tests import virusTotal as VT
 from Tests import vul_wapiti as VUL
 from Tests import whatcms as CMS
 from Tests import csa as CSA
+from Tests import visa_pci as VISA
 # from WebSecScore.Tests import 
 import requests
 
@@ -25,7 +26,8 @@ def testingDomainResults(domain, name = None):
         "VIRUSTOTAL" : None, 
         "WAPITI" : None, 
         "CMS" : None, 
-        "CSA" : None
+        "CSA" : None,
+        "VISA": None
     }
     
     try:
@@ -39,6 +41,7 @@ def testingDomainResults(domain, name = None):
         
         if name:
             result["CSA"] = CSA.checkCSAexists(name)
+            result["VISA"] = VISA.mainCheckVISA(name)
         
     except Exception as e:
         print(e)
@@ -46,15 +49,6 @@ def testingDomainResults(domain, name = None):
     finally:
         return result
 
-
-# def enterpriseNameResults(name):
-#     result = {"CSA" : None}
-#     try:
-#         result["CSA"] = CSA.checkCSAexists(name)
-#     except Exception as e:
-#         print(e)
-#     finally:
-#         return result
 
 def scoreResults(testingRes):
     
@@ -101,7 +95,22 @@ def scoreResults(testingRes):
     finally:
         return score
 
+def mainScanner(domain, companyName = None):
+    result = {
+        "scanDetails" : None,
+        "scanScore" : None,
+            
+    }
+    
+    testRes = testingDomainResults(domain, companyName)
+    testScore = scoreResults(testRes)
+    
+    result["scanDetails"] = testRes
+    result["scanScore"] = testScore
+    
+    return result
 
 
-testres = testingDomainResults("myetherevvalliet.com", "ZSCALER")
-print(scoreResults(testres))
+print(mainScanner("google.com", "google"))
+# testres = testingDomainResults("myetherevvalliet.com", "google")
+# print(scoreResults(testres))
