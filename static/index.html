@@ -13,8 +13,39 @@
     <style>
         /* General Styles */
         body { font-family: Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 0; }
-        .container { max-width: 1200px; margin: auto; padding: 20px; }
+        /* .container { max-width: 1200px; margin: auto; padding: 20px; } */
+        /* Center container and content */
+        .container {
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
 
+        /* Logos */
+        .scan-logos {
+            display: flex;
+            gap: 15px;
+            justify-content: center; /* Centers logos horizontally */
+            margin-top: 20px;
+            visibility: hidden; /* Initially hidden */
+        }
+
+        .logo {
+            width: 60px; /* Set uniform width */
+            height: 60px; /* Set uniform height */
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+
+        /* Center map and set width */
+        .map {
+            height: 400px;
+            width: 100%; /* Set map to full width of its container */
+            border-radius: 8px;
+            margin-top: 20px;
+        }
         /* Dashboard Styles */
         .dashboard { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
         .panel { background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; }
@@ -26,13 +57,14 @@
             border-radius: 50%;
             background: conic-gradient(#4caf50 calc(var(--percentage) * 1%), #e0e0e0 0%);
             display: flex;
+            margin: 20px auto; /* Centers the score circle */
             align-items: center;
             justify-content: center;
             position: relative;
             font-size: 2em;
             font-weight: bold;
             margin-bottom: 20px;
-        }
+        } 
 
         .score-circle::before {
             content: '';
@@ -40,9 +72,10 @@
             width: 60px;
             height: 60px;
             border-radius: 50%;
+            margin: 20px auto; /* Centers the score circle */
             background-color: #ffffff;
             z-index: 1;
-        }
+        } */
 
         #scoreText {
             position: relative;
@@ -68,24 +101,85 @@
         }
 
         /* Logos */
-        .scan-logos {
+        /* .scan-logos {
             display: flex;
             gap: 15px;
             margin-top: 20px;
             visibility: hidden; /* Initially hidden */
-        }
-        .logo {
+        /* } */ 
+        
+        /* Center container and content */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+}
+
+/* Circular Progress Bar */
+.score-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: conic-gradient(#4caf50 calc(var(--percentage) * 1%), #e0e0e0 0%);
+    display: flex;
+    margin: 20px auto;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.score-circle::before {
+    content: '';
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #ffffff;
+    z-index: 1;
+}
+
+#scoreText {
+    position: relative;
+    color: #333333;
+    z-index: 2;
+}
+
+/* Logos */
+.scan-logos {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+    visibility: hidden; /* Initially hidden */
+}
+
+.logo {
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.3s;
+}
+
+.logo.color { opacity: 1; }
+.logo.gray { filter: grayscale(100%); }
+
+
+        /* .logo {
             width: 50px;
             height: auto;
             cursor: pointer;
             opacity: 0.5;
             transition: opacity 0.3s;
-        }
+        } */
         .logo.color { opacity: 1; }
         .logo.gray { filter: grayscale(100%); }
 
         /* Result Panels */
-        .map { height: 300px; border-radius: 8px; margin-top: 20px; }
+        /* .map { height: 300px; border-radius: 8px; margin-top: 20px; } */
         .scan-info { font-size: 0.9rem; color: #333; }
         .scan-info pre { white-space: pre-wrap; word-wrap: break-word; }
 
@@ -148,13 +242,13 @@
 
         <!-- Logos -->
         <div id="scanLogos" class="scan-logos">
-            <img id="hibpLogo" src="hibp.webp" class="logo gray" alt="HIBP" onclick="showDetails('HIBP')" title="Have I Been Pwned">
-            <img id="cmsLogo" src="whatcms.png" class="logo gray" alt="CMS" onclick="showDetails('CMS')" title="CMS">
-            <img id="malwareLogo" src="MW.png" class="logo gray" alt="Malware" onclick="showDetails('MALWARE')" title="Malware">
-            <img id="openPortsLogo" src="open-ports.png" class="logo gray" alt="Open Ports" onclick="showDetails('OPEN_PORTS')" title="Open Ports">
-            <img id="threatFoxLogo" src="CP.png" class="logo gray" alt="ThreatFox" onclick="showDetails('THREATFOX')" title="ThreatFox">
-            <img id="virusTotalLogo" src="virustotal-public-api-loog.png" class="logo gray" alt="VirusTotal" onclick="showDetails('VIRUSTOTAL')" title="VirusTotal">
-            <img id="wapitiLogo" src="wapiti-logo.svg" class="logo gray" alt="Wapiti" onclick="showDetails('WAPITI')" title="Wapiti">
+            <img id="hibpLogo" src="static/hibp.webp" class="logo gray" alt="HIBP" onclick="showDetails('HIBP')" title="Have I Been Pwned">
+            <img id="cmsLogo" src="static/whatcms.png" class="logo gray" alt="CMS" onclick="showDetails('CMS')" title="CMS">
+            <img id="malwareLogo" src="static/MW.png" class="logo gray" alt="Malware" onclick="showDetails('MALWARE')" title="Malware">
+            <img id="openPortsLogo" src="static/open-ports.png" class="logo gray" alt="Open Ports" onclick="showDetails('OPEN_PORTS')" title="Open Ports">
+            <img id="threatFoxLogo" src="static/CP.png" class="logo gray" alt="ThreatFox" onclick="showDetails('THREATFOX')" title="ThreatFox">
+            <img id="virusTotalLogo" src="static/virustotal-public-api-loog.png" class="logo gray" alt="VirusTotal" onclick="showDetails('VIRUSTOTAL')" title="VirusTotal">
+            <img id="wapitiLogo" src="static/wapiti-logo.svg" class="logo gray" alt="Wapiti" onclick="showDetails('WAPITI')" title="Wapiti">
         </div>
 
         <!-- Map Panel -->
@@ -170,7 +264,7 @@
 
     <script>
         let scanResults = {}; // Global variable to store scan results
-        let map = L.map('map').setView([0, 0], 2); // Initialize map
+        // let map = L.map('map').setView([0, 0], 2); // Initialize map
 
         // Toggle company name field
         function toggleEnterpriseFields() {
@@ -181,12 +275,60 @@
         function showLoading() { document.getElementById('loader').style.display = 'block'; }
         function hideLoading() { document.getElementById('loader').style.display = 'none'; }
 
+        // function runScan() {
+        //     const scanType = document.getElementById('scan-type').value;
+        //     const domain = document.getElementById('domain').value;
+        //     const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
+
+        //     if (!domain) { alert("Please enter a domain."); return; }
+
+        //     const data = { domain: domain };
+        //     if (companyName) data.companyName = companyName;
+
+        //     showLoading();
+        //     document.getElementById("scanLogos").style.visibility = "hidden"; // Hide logos initially
+
+        //     fetch('/scan', {
+        //         method: 'POST',
+        //         headers: { 'Content-Type': 'application/json' },
+        //         body: JSON.stringify(data)
+        //     })
+        //     .then(response => response.json())
+        //     .then(result => {
+        //         hideLoading();
+        //         scanResults = result.scanDetails;
+
+        //         // Display score
+        //         displayScore(result.scanScore);
+
+        //         // Show logos and update based on scanStatus
+        //         document.getElementById("scanLogos").style.visibility = "visible";
+        //         updateLogoState('hibpLogo', result.scanStatus.HIBP);
+        //         updateLogoState('cmsLogo', result.scanStatus.CMS);
+        //         updateLogoState('malwareLogo', result.scanStatus.MALWARE);
+        //         updateLogoState('openPortsLogo', result.scanStatus.OPEN_PORTS);
+        //         updateLogoState('threatFoxLogo', result.scanStatus.THREATFOX);
+        //         updateLogoState('virusTotalLogo', result.scanStatus.VIRUSTOTAL);
+        //         updateLogoState('wapitiLogo', result.scanStatus.WAPITI);
+
+        //         // Update map location
+        //         displayMap(domain);
+        //     })
+        //     .catch(error => {
+        //         console.error('Error:', error);
+        //         hideLoading();
+        //     });
+        // }
+
         function runScan() {
             const scanType = document.getElementById('scan-type').value;
             const domain = document.getElementById('domain').value;
             const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
 
-            if (!domain) { alert("Please enter a domain."); return; }
+            if (!domain) { 
+                alert("Please enter a domain.");
+                return;
+            }
 
             const data = { domain: domain };
             if (companyName) data.companyName = companyName;
@@ -216,6 +358,16 @@
                 updateLogoState('threatFoxLogo', result.scanStatus.THREATFOX);
                 updateLogoState('virusTotalLogo', result.scanStatus.VIRUSTOTAL);
                 updateLogoState('wapitiLogo', result.scanStatus.WAPITI);
+
+                // Show CSA and VISA logos for enterprise scan if conditions are met
+                if (scanType === 'enterprise') {
+                    document.getElementById('csaLogos').style.display = result.scanStatus.CSA ? 'flex' : 'none';
+                    document.getElementById('visaLogoContainer').style.display = result.scanStatus.VISA ? 'block' : 'none';
+                } else {
+                    // Hide CSA and VISA logos for standard scan
+                    document.getElementById('csaLogos').style.display = 'none';
+                    document.getElementById('visaLogoContainer').style.display = 'none';
+                }
 
                 // Update map location
                 displayMap(domain);
@@ -253,24 +405,45 @@
             logoElement.classList.toggle('gray', !isActive);
         }
 
-        function displayMap(domain) {
-            fetch(`http://ip-api.com/json/${domain}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        const lat = data.lat;
-                        const lng = data.lon;
-                        map.setView([lat, lng], 10);
-                        L.marker([lat, lng]).addTo(map).bindPopup(`<b>${domain}</b>`).openPopup();
-                    } else {
-                        alert("Unable to determine location for this domain.");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error fetching location data:", error);
-                    alert("An error occurred while retrieving location data.");
-                });
+// Display domain location on a map
+    let map; // Define map globally to reuse and reset it
+
+    function displayMap(domain) {
+        // Clear any existing map instance if it's already initialized
+        if (map) {
+            map.remove(); // Remove the previous map instance
         }
+        
+        // Create a new map instance for the current domain
+        document.getElementById('map').innerHTML = ""; // Clear the map container
+
+        // Use ip-api.com to get geolocation data
+        fetch(`http://ip-api.com/json/${domain}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    const lat = data.lat;
+                    const lng = data.lon;
+
+                    // Initialize the map with the retrieved location
+                    map = L.map('map').setView([lat, lng], 10); // Reassign global map variable
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '&copy; OpenStreetMap contributors'
+                    }).addTo(map);
+
+                    // Add a marker with the domain name as a popup
+                    L.marker([lat, lng]).addTo(map).bindPopup(`<b>${domain}</b>`).openPopup();
+                } else {
+                    console.error("Location not found for domain:", domain);
+                    alert("Unable to determine location for this domain.");
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching location data:", error);
+                alert("An error occurred while retrieving location data.");
+            });
+    }
 
         function showDetails(scanType) {
             const scanDetails = scanResults[scanType];

@@ -53,10 +53,10 @@ def testingDomainResults(domain, name = None):
         # ScanStatus
         resultStatus = {
         "HIBP" : len(resultDetails["HIBP"]) > 0, 
-        "MALWARE" : resultDetails["MALWARE"]["isMalware"] == 0, 
-        "OPEN_PORTS" : len(resultDetails["OPEN_PORTS"]), 
-        "THREATFOX" : resultDetails["MALWARE"]["isCompromised"] == 0, 
-        "VIRUSTOTAL" : False, 
+        "MALWARE" : resultDetails["MALWARE"]["isMalware"] > 0, 
+        "OPEN_PORTS" : len(resultDetails["OPEN_PORTS"]) > 0, 
+        "THREATFOX" : resultDetails["THREATFOX"]["isCompromised"] > 0, 
+        "VIRUSTOTAL" : len(resultDetails["VIRUSTOTAL"]["virusTotalInfo"]) > 0, 
         "WAPITI" : resultDetails["WAPITI"] != {}, 
         "CMS" : len(resultDetails["CMS"]) > 0, 
     }
@@ -135,3 +135,5 @@ def mainScanner(domain, companyName = None):
     result["scanScore"] = testScore
     
     return result
+
+mainScanner("google.com")
