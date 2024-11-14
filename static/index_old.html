@@ -1,0 +1,346 @@
+<!-- Chart.js for score gauge -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Leaflet.js for the map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Domain Scanner Dashboard</title>
+    <style>
+        /* General Styles */
+        body { font-family: Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 0; }
+        .container { max-width: 1200px; margin: auto; padding: 20px; }
+
+        /* Dashboard Styles */
+        .dashboard { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        .panel { background-color: #ffffff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); padding: 20px; }
+
+        /* Circular Progress Bar */
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: conic-gradient(#4caf50 calc(var(--percentage) * 1%), #e0e0e0 0%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        /* Background for the Score Number */
+        .score-circle::before {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #ffffff; /* White background to enhance readability */
+            z-index: 1;
+        }
+
+        /* Score Number */
+        #scoreText {
+            position: relative;
+            color: #333333; /* Dark color for readability */
+            z-index: 2;
+        }
+
+        /* Loader */
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            display: none;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Result Panels */
+        .map { height: 400px; border-radius: 8px; }
+        .scan-info { font-size: 0.9rem; color: #333; }
+        .scan-info pre { white-space: pre-wrap; word-wrap: break-word; }
+
+        /* Button and Inputs */
+        .control-panel { margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
+        button { background-color: #3498db; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
+        button:hover { background-color: #2980b9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Domain Scanner Dashboard</h1>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <label for="scan-type">Select Scan Type:</label>
+            <select id="scan-type" onchange="toggleEnterpriseFields()">
+                <option value="standard">Standard Scan</option>
+                <option value="enterprise">Enterprise Scan</option>
+            </select>
+
+            <label for="domain">Domain:</label>
+            <input type="text" id="domain" required>
+
+            <div id="enterprise-fields" style="display: none;">
+                <label for="company-name">Company Name (Enterprise Scan only):</label>
+                <input type="text" id="company-name">
+            </div>
+        
+            <button onclick="runScan()">Run Scan</button>
+
+            <div id="loader" class="loader"></div>
+        </div>
+
+        <!-- Placeholder for Visa logo if VISA is not null -->
+            <div id="visaLogoContainer" style="display: none; margin-top: 20px;">
+                <h3>VISA COMPLIANCE</h3>
+                <img id="visaLogo" src="static/visa.png" alt="Visa Logo" style="width: 50px; height: auto;">
+            </div>
+
+            <!-- Placeholder for logos if CSA is true -->
+            <div id="csaLogos" style="display: none; margin-top: 20px;">
+                <h3>Cloud Security Alliance Compliance</h3> <br>
+                <img id="logo1" src="static/CSA_Trusted_Cloud_Provider_badge.svg" alt="Logo 1" style="width: 100; height: auto; margin-right: 10px;">
+                <img id="logo2" src="static/star_enabled_solutions_badge.svg" alt="Logo 2" style="width: 100; height: auto;">
+            </div>
+
+        <!-- Dashboard Layout -->
+        <div class="dashboard">
+            <!-- Score Circle -->
+            <div class="panel">
+                <h2>Scan Score</h2>
+                <div id="scoreCircle" class="score-circle" style="--percentage: 0;">
+                    <span id="scoreText">--</span>
+                </div>
+            </div>
+
+            <!-- Map Panel -->
+            <div class="panel">
+                <h2>Domain Map</h2>
+                <div id="map" class="map"></div>
+            </div>
+
+            <!-- Scan Details -->
+            <div class="panel" style="grid-column: span 2;">
+                <h2>Scan Details</h2>
+                <div id="result-details" class="scan-info"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+    <script>
+        // Toggle company name field
+        function toggleEnterpriseFields() {
+            const scanType = document.getElementById('scan-type').value;
+            document.getElementById('enterprise-fields').style.display = scanType === 'enterprise' ? 'block' : 'none';
+        }
+
+        // Show and hide loader
+        function showLoading() { document.getElementById('loader').style.display = 'block'; }
+        function hideLoading() { document.getElementById('loader').style.display = 'none'; }
+
+        // Run scan and display results
+        // function runScan() {
+        //     const scanType = document.getElementById('scan-type').value;
+        //     const domain = document.getElementById('domain').value;
+        //     const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
+            
+        //     if (!domain) { alert("Please enter a domain."); return; }
+
+        //     const data = { domain: domain };
+        //     if (companyName) data.companyName = companyName;
+
+        //     showLoading();
+
+        //     fetch('/scan', {
+        //         method: 'POST',
+        //         headers: { 'Content-Type': 'application/json' },
+        //         body: JSON.stringify(data)
+        //     })
+        //     .then(response => response.json())
+        //     .then(result => {
+        //         hideLoading();
+                
+        //         displayScore(result.scanScore);
+        //         displayScanDetails(result.scanDetails);
+        //         displayMap(domain);
+
+        //         if (result.scanDetails.CSA === true) {
+        //             document.getElementById('csaLogos').style.display = 'flex';
+        //         } else {
+        //             document.getElementById('csaLogos').style.display = 'none';
+        //         }
+
+        //         if (result.scanDetails.VISA === true) {
+        //             document.getElementById('visaLogoContainer').style.display = 'block';
+        //         } else {
+        //             document.getElementById('visaLogoContainer').style.display = 'none';
+        //         }
+        //     })
+        //     .catch(error => {
+        //         console.error('Error:', error);
+        //         hideLoading();
+        //     });
+        // }
+
+        function runScan() {
+            const scanType = document.getElementById('scan-type').value;
+            const domain = document.getElementById('domain').value;
+            const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
+            
+            if (!domain) { alert("Please enter a domain."); return; }
+
+            const data = { domain: domain };
+            if (companyName) data.companyName = companyName;
+
+            showLoading();
+
+            fetch('/scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                hideLoading();
+
+                // Parse embedded JSON strings in WAPITI fields if they exist
+                const wapiti = result.scanDetails.WAPITI;
+                try {
+                    if (wapiti["Content Security Policy Configuration"]) {
+                        wapiti["Content Security Policy Configuration"] = JSON.parse(wapiti["Content Security Policy Configuration"]);
+                    }
+                    if (wapiti["HTTP Secure Headers"]) {
+                        wapiti["HTTP Secure Headers"] = JSON.parse(wapiti["HTTP Secure Headers"]);
+                    }
+                    if (wapiti["HttpOnly Flag cookie"]) {
+                        wapiti["HttpOnly Flag cookie"] = JSON.parse(wapiti["HttpOnly Flag cookie"]);
+                    }
+                } catch (error) {
+                    console.error("Error parsing WAPITI fields:", error);
+                }
+                
+                displayScore(result.scanScore);
+                displayScanDetails(result.scanDetails);
+                displayMap(domain);
+
+                // Handle CSA and VISA logos based on response and scan type
+                if (scanType === 'enterprise') {
+                    if (result.scanDetails.CSA === true) {
+                        document.getElementById('csaLogos').style.display = 'flex';
+                    } else {
+                        document.getElementById('csaLogos').style.display = 'none';
+                    }
+
+                    if (Array.isArray(result.scanDetails.VISA) && result.scanDetails.VISA.length > 0) {
+                        document.getElementById('visaLogoContainer').style.display = 'block';
+                    } else {
+                        document.getElementById('visaLogoContainer').style.display = 'none';
+                    }
+                } else {
+                    document.getElementById('csaLogos').style.display = 'none';
+                    document.getElementById('visaLogoContainer').style.display = 'none';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                hideLoading();
+            });
+        }
+
+        // Display scan score
+        function displayScore(score) {
+            const scoreCircle = document.getElementById('scoreCircle');
+            const scoreText = document.getElementById('scoreText');
+            
+            scoreCircle.style.setProperty('--percentage', score);
+            scoreText.textContent = score;
+
+            if (score <= 30) {
+                scoreCircle.style.background = 'conic-gradient(#e74c3c calc(var(--percentage) * 1%), #e0e0e0 0%)';
+                scoreText.style.color = '#e74c3c';
+            } else if (score <= 60) {
+                scoreCircle.style.background = 'conic-gradient(#e67e22 calc(var(--percentage) * 1%), #e0e0e0 0%)';
+                scoreText.style.color = '#e67e22';
+            } else if (score <= 80) {
+                scoreCircle.style.background = 'conic-gradient(#f1c40f calc(var(--percentage) * 1%), #e0e0e0 0%)';
+                scoreText.style.color = '#f1c40f';
+            } else {
+                scoreCircle.style.background = 'conic-gradient(#2ecc71 calc(var(--percentage) * 1%), #e0e0e0 0%)';
+                scoreText.style.color = '#2ecc71';
+            }
+        }
+
+        // Display scan details
+        function displayScanDetails(details) {
+            const resultDiv = document.getElementById('result-details');
+            resultDiv.innerHTML = '<pre>' + JSON.stringify(details, null, 2) + '</pre>';
+        }
+
+// Display domain location on a map
+        let map; // Define map globally to reuse and reset it
+
+        function displayMap(domain) {
+            // Clear any existing map instance if it's already initialized
+            if (map) {
+                map.remove(); // Remove the previous map instance
+            }
+            
+            // Create a new map instance for the current domain
+            document.getElementById('map').innerHTML = ""; // Clear the map container
+
+            // Use ip-api.com to get geolocation data
+            fetch(`http://ip-api.com/json/${domain}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        const lat = data.lat;
+                        const lng = data.lon;
+
+                        // Initialize the map with the retrieved location
+                        map = L.map('map').setView([lat, lng], 10); // Reassign global map variable
+                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                            maxZoom: 19,
+                            attribution: '&copy; OpenStreetMap contributors'
+                        }).addTo(map);
+
+                        // Add a marker with the domain name as a popup
+                        L.marker([lat, lng]).addTo(map).bindPopup(`<b>${domain}</b>`).openPopup();
+                    } else {
+                        console.error("Location not found for domain:", domain);
+                        alert("Unable to determine location for this domain.");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching location data:", error);
+                    alert("An error occurred while retrieving location data.");
+                });
+        }
+
+        // Add event listener for Enter key on domain input
+        document.getElementById("domain").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                runScan();
+            }
+        });
+    </script>
+</body>
+</html>

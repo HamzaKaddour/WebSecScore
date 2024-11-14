@@ -1,16 +1,15 @@
-<!-- Chart.js for score gauge -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<!-- Leaflet.js for the map -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Domain Scanner Dashboard</title>
+
+    <!-- External Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
     <style>
         /* General Styles */
         body { font-family: Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 0; }
@@ -32,23 +31,22 @@
             position: relative;
             font-size: 2em;
             font-weight: bold;
+            margin-bottom: 20px;
         }
 
-        /* Background for the Score Number */
         .score-circle::before {
             content: '';
             position: absolute;
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            background-color: #ffffff; /* White background to enhance readability */
+            background-color: #ffffff;
             z-index: 1;
         }
 
-        /* Score Number */
         #scoreText {
             position: relative;
-            color: #333333; /* Dark color for readability */
+            color: #333333;
             z-index: 2;
         }
 
@@ -69,15 +67,53 @@
             100% { transform: rotate(360deg); }
         }
 
+        /* Logos */
+        .scan-logos {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            visibility: hidden; /* Initially hidden */
+        }
+        .logo {
+            width: 50px;
+            height: auto;
+            cursor: pointer;
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+        .logo.color { opacity: 1; }
+        .logo.gray { filter: grayscale(100%); }
+
         /* Result Panels */
-        .map { height: 400px; border-radius: 8px; }
+        .map { height: 300px; border-radius: 8px; margin-top: 20px; }
         .scan-info { font-size: 0.9rem; color: #333; }
         .scan-info pre { white-space: pre-wrap; word-wrap: break-word; }
 
-        /* Button and Inputs */
+        /* Control Panel */
         .control-panel { margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
         button { background-color: #3498db; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; }
         button:hover { background-color: #2980b9; }
+
+        /* Details Modal */
+        .details-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            width: 400px;
+            max-width: 90%;
+            padding: 20px;
+            z-index: 1000;
+        }
+        .modal-close {
+            text-align: right;
+            cursor: pointer;
+            color: #888;
+        }
     </style>
 </head>
 <body>
@@ -99,117 +135,64 @@
                 <label for="company-name">Company Name (Enterprise Scan only):</label>
                 <input type="text" id="company-name">
             </div>
-        
+
             <button onclick="runScan()">Run Scan</button>
 
             <div id="loader" class="loader"></div>
         </div>
 
-        <!-- Placeholder for Visa logo if VISA is not null -->
-            <div id="visaLogoContainer" style="display: none; margin-top: 20px;">
-                <h3>VISA COMPLIANCE</h3>
-                <img id="visaLogo" src="static/visa.png" alt="Visa Logo" style="width: 50px; height: auto;">
-            </div>
-
-
-            <!-- Placeholder for logos if CSA is true -->
-            <div id="csaLogos" style="display: none; margin-top: 20px;">
-                <h3>Cloud Security Alliance Compliance</h3> <br>
-                <img id="logo1" src="static/CSA_Trusted_Cloud_Provider_badge.svg" alt="Logo 1" style="width: 100; height: auto; margin-right: 10px;">
-                <img id="logo2" src="static/star_enabled_solutions_badge.svg" alt="Logo 2" style="width: 100; height: auto;">
-            </div>
-
-        <!-- Dashboard Layout -->
-        <div class="dashboard">
-            
-
-
-            <!-- Score Circle -->
-            <div class="panel">
-                <h2>Scan Score</h2>
-                <div id="scoreCircle" class="score-circle" style="--percentage: 0;">
-                    <span id="scoreText">--</span>
-                </div>
-            </div>
-
-            <!-- Map Panel -->
-            <div class="panel">
-                <h2>Domain Map</h2>
-                <div id="map" class="map"></div>
-            </div>
-
-            <!-- Scan Details -->
-            <div class="panel" style="grid-column: span 2;">
-                <h2>Scan Details</h2>
-                <div id="result-details" class="scan-info"></div>
-            </div>
+        <!-- Score Circle -->
+        <div id="scoreCircle" class="score-circle" style="--percentage: 0;">
+            <span id="scoreText">--</span>
         </div>
 
+        <!-- Logos -->
+        <div id="scanLogos" class="scan-logos">
+            <img id="hibpLogo" src="hibp.webp" class="logo gray" alt="HIBP" onclick="showDetails('HIBP')" title="Have I Been Pwned">
+            <img id="cmsLogo" src="whatcms.png" class="logo gray" alt="CMS" onclick="showDetails('CMS')" title="CMS">
+            <img id="malwareLogo" src="MW.png" class="logo gray" alt="Malware" onclick="showDetails('MALWARE')" title="Malware">
+            <img id="openPortsLogo" src="open-ports.png" class="logo gray" alt="Open Ports" onclick="showDetails('OPEN_PORTS')" title="Open Ports">
+            <img id="threatFoxLogo" src="CP.png" class="logo gray" alt="ThreatFox" onclick="showDetails('THREATFOX')" title="ThreatFox">
+            <img id="virusTotalLogo" src="virustotal-public-api-loog.png" class="logo gray" alt="VirusTotal" onclick="showDetails('VIRUSTOTAL')" title="VirusTotal">
+            <img id="wapitiLogo" src="wapiti-logo.svg" class="logo gray" alt="Wapiti" onclick="showDetails('WAPITI')" title="Wapiti">
+        </div>
+
+        <!-- Map Panel -->
+        <div id="map" class="map"></div>
+
+        <!-- Scan Details Modal -->
+        <div id="detailsModal" class="details-modal">
+            <div class="modal-close" onclick="closeModal()">✖</div>
+            <h2>Scan Details</h2>
+            <div id="modalContent" class="scan-info"></div>
+        </div>
     </div>
 
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-
     <script>
+        let scanResults = {}; // Global variable to store scan results
+        let map = L.map('map').setView([0, 0], 2); // Initialize map
+
         // Toggle company name field
         function toggleEnterpriseFields() {
             const scanType = document.getElementById('scan-type').value;
             document.getElementById('enterprise-fields').style.display = scanType === 'enterprise' ? 'block' : 'none';
         }
 
-        // Show and hide loader
         function showLoading() { document.getElementById('loader').style.display = 'block'; }
         function hideLoading() { document.getElementById('loader').style.display = 'none'; }
-
-        // Run scan and display results
-        // function runScan() {
-        //     const scanType = document.getElementById('scan-type').value;
-        //     const domain = document.getElementById('domain').value;
-        //     const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
-            
-        //     if (!domain) { alert("Please enter a domain."); return; }
-
-        //     const data = { domain: domain };
-        //     if (companyName) data.companyName = companyName;
-
-        //     showLoading();
-
-        //     fetch('/scan', {
-        //         method: 'POST',
-        //         headers: { 'Content-Type': 'application/json' },
-        //         body: JSON.stringify(data)
-        //     })
-        //     .then(response => response.json())
-        //     .then(result => {
-        //         hideLoading();
-                
-        //         displayScore(result.scanScore);
-        //         displayScanDetails(result.scanDetails);
-        //         displayMap(domain);
-
-        //         // Check if CSA is true and display logos
-        //         if (result.scanDetails.CSA === true) {
-        //             document.getElementById('csaLogos').style.display = 'flex';
-        //         } else {
-        //             document.getElementById('csaLogos').style.display = 'none';
-        //         }
-        //     })
-        //     .catch(error => {
-        //         console.error('Error:', error);
-        //         hideLoading();
-        //     });
-        // }
 
         function runScan() {
             const scanType = document.getElementById('scan-type').value;
             const domain = document.getElementById('domain').value;
             const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
-            
+
             if (!domain) { alert("Please enter a domain."); return; }
 
             const data = { domain: domain };
             if (companyName) data.companyName = companyName;
 
             showLoading();
+            document.getElementById("scanLogos").style.visibility = "hidden"; // Hide logos initially
 
             fetch('/scan', {
                 method: 'POST',
@@ -219,24 +202,23 @@
             .then(response => response.json())
             .then(result => {
                 hideLoading();
-                
+                scanResults = result.scanDetails;
+
+                // Display score
                 displayScore(result.scanScore);
-                displayScanDetails(result.scanDetails);
+
+                // Show logos and update based on scanStatus
+                document.getElementById("scanLogos").style.visibility = "visible";
+                updateLogoState('hibpLogo', result.scanStatus.HIBP);
+                updateLogoState('cmsLogo', result.scanStatus.CMS);
+                updateLogoState('malwareLogo', result.scanStatus.MALWARE);
+                updateLogoState('openPortsLogo', result.scanStatus.OPEN_PORTS);
+                updateLogoState('threatFoxLogo', result.scanStatus.THREATFOX);
+                updateLogoState('virusTotalLogo', result.scanStatus.VIRUSTOTAL);
+                updateLogoState('wapitiLogo', result.scanStatus.WAPITI);
+
+                // Update map location
                 displayMap(domain);
-
-                // Check if CSA is true and display CSA logos
-                if (result.scanDetails.CSA === true) {
-                    document.getElementById('csaLogos').style.display = 'flex';
-                } else {
-                    document.getElementById('csaLogos').style.display = 'none';
-                }
-
-                // Check if VISA is not null and display Visa logo
-                if (result.scanDetails.VISA === true) {
-                    document.getElementById('visaLogoContainer').style.display = 'block';
-                } else {
-                    document.getElementById('visaLogoContainer').style.display = 'none';
-                }
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -244,61 +226,43 @@
             });
         }
 
-
-
-        // Display scan score as a circular button-like progress with color thresholds
         function displayScore(score) {
             const scoreCircle = document.getElementById('scoreCircle');
             const scoreText = document.getElementById('scoreText');
-            
-            // Set the circular progress percentage
             scoreCircle.style.setProperty('--percentage', score);
             scoreText.textContent = score;
 
-            // Apply color based on score thresholds
             if (score <= 30) {
-                scoreCircle.style.background = 'conic-gradient(#e74c3c calc(var(--percentage) * 1%), #e0e0e0 0%)'; // Red
+                scoreCircle.style.background = 'conic-gradient(#e74c3c calc(var(--percentage) * 1%), #e0e0e0 0%)';
                 scoreText.style.color = '#e74c3c';
             } else if (score <= 60) {
-                scoreCircle.style.background = 'conic-gradient(#e67e22 calc(var(--percentage) * 1%), #e0e0e0 0%)'; // Orange
+                scoreCircle.style.background = 'conic-gradient(#e67e22 calc(var(--percentage) * 1%), #e0e0e0 0%)';
                 scoreText.style.color = '#e67e22';
             } else if (score <= 80) {
-                scoreCircle.style.background = 'conic-gradient(#f1c40f calc(var(--percentage) * 1%), #e0e0e0 0%)'; // Yellow
+                scoreCircle.style.background = 'conic-gradient(#f1c40f calc(var(--percentage) * 1%), #e0e0e0 0%)';
                 scoreText.style.color = '#f1c40f';
             } else {
-                scoreCircle.style.background = 'conic-gradient(#2ecc71 calc(var(--percentage) * 1%), #e0e0e0 0%)'; // Green
+                scoreCircle.style.background = 'conic-gradient(#2ecc71 calc(var(--percentage) * 1%), #e0e0e0 0%)';
                 scoreText.style.color = '#2ecc71';
             }
         }
 
-        // Display scan details
-        function displayScanDetails(details) {
-            const resultDiv = document.getElementById('result-details');
-            resultDiv.innerHTML = '<pre>' + JSON.stringify(details, null, 2) + '</pre>';
+        function updateLogoState(logoId, isActive) {
+            const logoElement = document.getElementById(logoId);
+            logoElement.classList.toggle('color', isActive);
+            logoElement.classList.toggle('gray', !isActive);
         }
 
-        // Display domain location on a map
         function displayMap(domain) {
-            // Use ip-api.com to get geolocation data
             fetch(`http://ip-api.com/json/${domain}`)
                 .then(response => response.json())
                 .then(data => {
-                    // Check if the API returned a valid location
                     if (data.status === "success") {
                         const lat = data.lat;
                         const lng = data.lon;
-
-                        // Initialize the map with the retrieved location
-                        const map = L.map('map').setView([lat, lng], 10);
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            maxZoom: 19,
-                            attribution: '&copy; OpenStreetMap contributors'
-                        }).addTo(map);
-
-                        // Add a marker with the domain name as a popup
+                        map.setView([lat, lng], 10);
                         L.marker([lat, lng]).addTo(map).bindPopup(`<b>${domain}</b>`).openPopup();
                     } else {
-                        console.error("Location not found for domain:", domain);
                         alert("Unable to determine location for this domain.");
                     }
                 })
@@ -306,6 +270,18 @@
                     console.error("Error fetching location data:", error);
                     alert("An error occurred while retrieving location data.");
                 });
+        }
+
+        function showDetails(scanType) {
+            const scanDetails = scanResults[scanType];
+            if (scanDetails) {
+                document.getElementById('modalContent').innerHTML = `<pre>${JSON.stringify(scanDetails, null, 2)}</pre>`;
+                document.getElementById('detailsModal').style.display = 'block';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('detailsModal').style.display = 'none';
         }
     </script>
 </body>

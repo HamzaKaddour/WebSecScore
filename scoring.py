@@ -7,8 +7,10 @@ from Tests import vul_wapiti as VUL
 from Tests import whatcms as CMS
 from Tests import csa as CSA
 from Tests import visa_pci as VISA
+
 # from WebSecScore.Tests import 
 import requests
+import json
 
 # TODO #
 '''
@@ -18,7 +20,7 @@ ADD THE REGEX OF THE DOMAIN SO THAT IT TAKES DIFFERENT COMBINIZATIONS OF THE DOM
 
 
 def testingDomainResults(domain, name = None):
-    result = {
+    resultDetails = {
         "HIBP" : None, 
         "MALWARE" : None, 
         "OPEN_PORTS" : None, 
@@ -26,28 +28,51 @@ def testingDomainResults(domain, name = None):
         "VIRUSTOTAL" : None, 
         "WAPITI" : None, 
         "CMS" : None, 
-    #     "CSA" : None,
-    #     "VISA": None
+    }
+
+    resultStatus = {
+        "HIBP" : False, 
+        "MALWARE" : False, 
+        "OPEN_PORTS" : False, 
+        "THREATFOX" : False, 
+        "VIRUSTOTAL" : False, 
+        "WAPITI" : False, 
+        "CMS" : False, 
     }
     
     try:
-        result["HIBP"] = HIBP.checkHIBP(domain) 
-        result["MALWARE"] = MW.checkMalwareURL(domain)
-        result["OPEN_PORTS"] = OP.scan_open_ports(domain)
-        result["THREATFOX"] = COMPROMIZE.checkCompromisedURL(domain)
-        result["VIRUSTOTAL"] = VT.findVirusTotalResult(domain)
-        result["WAPITI"] = VUL.vulnerabilityFinder(domain)
-        result["CMS"] = CMS.startCMSChecks(domain)
+        # Scan Details
+        resultDetails["HIBP"] = HIBP.checkHIBP(domain) 
+        resultDetails["MALWARE"] = MW.checkMalwareURL(domain)
+        resultDetails["OPEN_PORTS"] = OP.scan_open_ports(domain)
+        resultDetails["THREATFOX"] = COMPROMIZE.checkCompromisedURL(domain)
+        resultDetails["VIRUSTOTAL"] = VT.findVirusTotalResult(domain)
+        resultDetails["WAPITI"] = VUL.vulnerabilityFinder(domain)
+        resultDetails["CMS"] = CMS.startCMSChecks(domain)
         
+        # ScanStatus
+        resultStatus = {
+        "HIBP" : len(resultDetails["HIBP"]) > 0, 
+        "MALWARE" : resultDetails["MALWARE"]["isMalware"] == 0, 
+        "OPEN_PORTS" : len(resultDetails["OPEN_PORTS"]), 
+        "THREATFOX" : resultDetails["MALWARE"]["isCompromised"] == 0, 
+        "VIRUSTOTAL" : False, 
+        "WAPITI" : resultDetails["WAPITI"] != {}, 
+        "CMS" : len(resultDetails["CMS"]) > 0, 
+    }
         if name:
-            result["CSA"] = CSA.checkCSAexists(name)
-            result["VISA"] = VISA.mainCheckVISA(name)
-        
+            resultDetails["CSA"] = CSA.checkCSAexists(name)
+            resultDetails["VISA"] = VISA.mainCheckVISA(name)
+            resultStatus["CSA"] = CSA.checkCSAexists(name)
+            resultStatus["VISA"] = len(resultDetails["VISA"]) > 0
+            
+            
+            
     except Exception as e:
         print(e)
         
     finally:
-        return result
+        return resultDetails, resultStatus
 
 
 def scoreResults(testingRes):
@@ -97,20 +122,16 @@ def scoreResults(testingRes):
 
 def mainScanner(domain, companyName = None):
     result = {
+        "scanStatus" : None,
         "scanDetails" : None,
         "scanScore" : None,
             
     }
     
     testRes = testingDomainResults(domain, companyName)
-    testScore = scoreResults(testRes)
+    testScore = scoreResults(testRes[0])
     
-    result["scanDetails"] = testRes
+    result["scanDetails"], result["scanStatus"] = testRes
     result["scanScore"] = testScore
     
     return result
-
-
-print(mainScanner("google.com", "google"))
-# testres = testingDomainResults("myetherevvalliet.com", "google")
-# print(scoreResults(testres))

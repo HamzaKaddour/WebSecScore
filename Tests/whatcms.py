@@ -23,6 +23,7 @@ def startCMSChecks(url):
     except Exception as e:
         print("WHATCMS Warning: ",e)
         jsonResult = {"WhatCMS_Scan": "Failed", "FailReason": "No address associated with hostname"}   
+        return []
 
 # print(startCMSChecks('wordpress.com'))
 
