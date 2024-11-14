@@ -40,7 +40,7 @@ def checkCompromisedURL(domain):
         else:
             result["info"] = "invalid response code"
     except Exception as e:
-        print(e)
+        print("ThreatFox IP Warning: ",e)
     finally:
         return result
             

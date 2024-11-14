@@ -68,7 +68,7 @@ def mainCheckVISA(companyName):
             cpny = None
     return result
 
-print(mainCheckVISA("google"))
+# print(mainCheckVISA("google"))
 
 
 

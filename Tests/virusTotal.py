@@ -29,7 +29,7 @@ def findVirusTotalResult(domain):
             result["virusTotalScore"] = 1
             
     except Exception as e:
-        print(e)
+        print("VirusTotal Warning: ",e)
     finally:
         return result
     

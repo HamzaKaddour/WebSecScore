@@ -19,7 +19,7 @@ def checkHIBP(domain):
                     
          
     except Exception as e:
-        print(e)
+        print("HIBP Warning: ",e)
     finally:
         return result
             

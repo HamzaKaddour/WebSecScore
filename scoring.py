@@ -26,8 +26,8 @@ def testingDomainResults(domain, name = None):
         "VIRUSTOTAL" : None, 
         "WAPITI" : None, 
         "CMS" : None, 
-        "CSA" : None,
-        "VISA": None
+    #     "CSA" : None,
+    #     "VISA": None
     }
     
     try:
