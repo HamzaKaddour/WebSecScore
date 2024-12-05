@@ -3,24 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Domain Scanner Dashboard</title>
+    <!-- <title>WebSecScore</title> -->
+    <title>WebSecScore Domain Scanner Dashboard</title>
+
 
     <!-- External Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="icon" href="/static/lock.png" type="image/png">
 
     <style>
         /* General Styles */
-        body { font-family: Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 0; }
+        /* body { font-family: Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 0; } */
         /* .container { max-width: 1200px; margin: auto; padding: 20px; } */
         /* Center container and content */
-        .container {
+        /* .container {
             max-width: 1200px;
             margin: auto;
             padding: 20px;
             text-align: center;
-        }
+        } */
+    body {
+        font-family: Arial, sans-serif;
+        background: url('/static/isu.jpg') no-repeat center center fixed;
+        background-size: cover;
+        margin: 0;
+        padding: 0;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+        text-align: center;
+        background: rgba(255, 255, 255, 1); /* Optional: white background with transparency for readability */
+        border-radius: 10px;
+    }
 
         /* Logos */
         .scan-logos {
@@ -32,10 +51,10 @@
         }
 
         .logo {
-            width: 60px; /* Set uniform width */
-            height: 60px; /* Set uniform height */
+            width: 100px; /* Set uniform width */
+            height: 100px; /* Set uniform height */
             cursor: pointer;
-            opacity: 0.5;
+            opacity: 1;
             transition: opacity 0.3s;
         }
 
@@ -157,10 +176,10 @@
 }
 
 .logo {
-    width: 60px;
-    height: 60px;
+    width: 100px;
+    height: 100px;
     cursor: pointer;
-    opacity: 0.5;
+    opacity: 0.8;
     transition: opacity 0.3s;
 }
 
@@ -212,7 +231,8 @@
 </head>
 <body>
     <div class="container">
-        <h1>Domain Scanner Dashboard</h1>
+        <h1>WebSecScore</h1>
+        <h2>Domain Scanner Dashboard</h2>
 
         <!-- Control Panel -->
         <div class="control-panel">
@@ -235,10 +255,46 @@
             <div id="loader" class="loader"></div>
         </div>
 
+                <!-- Dashboard Layout -->
+                <div class="dashboard">
+                    <!-- Score Circle -->
+                    <div class="panel">
+                        <h2>Scan Score</h2>
+                        <div id="scoreCircle" class="score-circle" style="--percentage: 0;">
+                            <span id="scoreText">--</span>
+                        </div>
+                    </div>
+        
+                    <!-- Map Panel -->
+                    <div class="panel">
+                        <h2>Domain Map</h2>
+                        <div id="map" class="map"></div>
+                    </div>
+                </div>
+
+                <div id="dynamicLogos" class="scan-logos"></div>
+
+        
+                    <!-- Scan Details
+                    <div class="panel" style="grid-column: span 2;">
+                        <h2>Scan Details</h2>
+                        <div id="result-details" class="scan-info"></div>
+                    </div>
+                </div>
+         -->
         <!-- Score Circle -->
-        <div id="scoreCircle" class="score-circle" style="--percentage: 0;">
+        <!-- <div id="scoreCircle" class="score-circle" style="--percentage: 0;">
             <span id="scoreText">--</span>
-        </div>
+        </div> -->
+
+        <!-- Map Panel -->
+        <!-- <div class="panel">
+            <h2>Domain Map</h2>
+            <div id="map" class="map"></div>
+        </div> -->
+        <!-- Separate containers for VISA and CSA logos -->
+        <div id="visaLogoContainer" style="visibility: hidden; margin-top: 20px;"></div>
+        <div id="csaLogoContainer" style="visibility: hidden; margin-top: 20px;"></div>
 
         <!-- Logos -->
         <div id="scanLogos" class="scan-logos">
@@ -275,12 +331,16 @@
         function showLoading() { document.getElementById('loader').style.display = 'block'; }
         function hideLoading() { document.getElementById('loader').style.display = 'none'; }
 
+
         // function runScan() {
         //     const scanType = document.getElementById('scan-type').value;
         //     const domain = document.getElementById('domain').value;
         //     const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
 
-        //     if (!domain) { alert("Please enter a domain."); return; }
+        //     if (!domain) { 
+        //         alert("Please enter a domain.");
+        //         return;
+        //     }
 
         //     const data = { domain: domain };
         //     if (companyName) data.companyName = companyName;
@@ -300,6 +360,7 @@
 
         //         // Display score
         //         displayScore(result.scanScore);
+        //         displayMap(domain);
 
         //         // Show logos and update based on scanStatus
         //         document.getElementById("scanLogos").style.visibility = "visible";
@@ -311,6 +372,16 @@
         //         updateLogoState('virusTotalLogo', result.scanStatus.VIRUSTOTAL);
         //         updateLogoState('wapitiLogo', result.scanStatus.WAPITI);
 
+        //         // Show CSA and VISA logos for enterprise scan if conditions are met
+        //         if (scanType === 'enterprise') {
+        //             document.getElementById('csaLogos').style.display = result.scanStatus.CSA ? 'flex' : 'none';
+        //             document.getElementById('visaLogoContainer').style.display = result.scanStatus.VISA ? 'block' : 'none';
+        //         } else {
+        //             // Hide CSA and VISA logos for standard scan
+        //             document.getElementById('csaLogos').style.display = 'none';
+        //             document.getElementById('visaLogoContainer').style.display = 'none';
+        //         }
+
         //         // Update map location
         //         displayMap(domain);
         //     })
@@ -320,63 +391,138 @@
         //     });
         // }
 
-        function runScan() {
-            const scanType = document.getElementById('scan-type').value;
-            const domain = document.getElementById('domain').value;
-            const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
+//         function runScan() {
+//     const scanType = document.getElementById('scan-type').value;
+//     const domain = document.getElementById('domain').value;
+//     const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
 
-            if (!domain) { 
-                alert("Please enter a domain.");
-                return;
+//     if (!domain) {
+//         alert("Please enter a domain.");
+//         return;
+//     }
+
+//     const data = { domain: domain };
+//     if (companyName) data.companyName = companyName;
+
+//     showLoading();
+//     document.getElementById("scanLogos").style.visibility = "hidden"; // Hide logos initially
+
+//     fetch('/scan', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify(data)
+//     })
+//         .then(response => response.json())
+//         .then(result => {
+//             hideLoading();
+//             scanResults = result.scanDetails;
+
+//             // Display score
+//             displayScore(result.scanScore);
+//             displayMap(domain);
+
+//             // Show logos and update based on scanStatus
+//             document.getElementById("scanLogos").style.visibility = "visible";
+//             updateLogoState('hibpLogo', result.scanStatus.HIBP);
+//             updateLogoState('cmsLogo', result.scanStatus.CMS);
+//             updateLogoState('malwareLogo', result.scanStatus.MALWARE);
+//             updateLogoState('openPortsLogo', result.scanStatus.OPEN_PORTS);
+//             updateLogoState('threatFoxLogo', result.scanStatus.THREATFOX);
+//             updateLogoState('virusTotalLogo', result.scanStatus.VIRUSTOTAL);
+//             updateLogoState('wapitiLogo', result.scanStatus.WAPITI);
+
+//             // Dynamically handle CSA and VISA logos
+//             const dynamicLogos = document.getElementById('dynamicLogos');
+
+//             // Clear existing dynamic logos
+//             dynamicLogos.innerHTML = '';
+
+//             if (result.scanStatus.CSA) {
+//                 const csaLogo = document.createElement('img');
+//                 csaLogo.src = 'static/CSA_Trusted_Cloud_Provider_badge.svg';
+//                 csaLogo.alt = 'CSA Trusted Cloud Provider';
+//                 csaLogo.className = 'logo';
+//                 dynamicLogos.appendChild(csaLogo);
+//             }
+
+//             if (result.scanStatus.VISA) {
+//                 const visaLogo = document.createElement('img');
+//                 visaLogo.src = 'static/visa.png';
+//                 visaLogo.alt = 'VISA';
+//                 visaLogo.className = 'logo';
+//                 dynamicLogos.appendChild(visaLogo);
+//             }
+//         })
+//         .catch(error => {
+//             console.error('Error:', error);
+//             hideLoading();
+//         });
+// }
+
+function runScan() {
+    const scanType = document.getElementById('scan-type').value;
+    const domain = document.getElementById('domain').value;
+    const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
+
+    if (!domain) {
+        alert("Please enter a domain.");
+        return;
+    }
+
+    const data = { domain: domain };
+    if (companyName) data.companyName = companyName;
+
+    showLoading();
+
+    fetch('/scan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+    })
+        .then(response => response.json())
+        .then(result => {
+            hideLoading();
+            scanResults = result.scanDetails;
+
+            // Display score and map
+            displayScore(result.scanScore);
+            displayMap(domain);
+
+            // Update general scan logos
+            document.getElementById("scanLogos").style.visibility = "visible";
+            updateLogoState('hibpLogo', result.scanStatus.HIBP);
+            updateLogoState('cmsLogo', result.scanStatus.CMS);
+            updateLogoState('malwareLogo', result.scanStatus.MALWARE);
+            updateLogoState('openPortsLogo', result.scanStatus.OPEN_PORTS);
+            updateLogoState('threatFoxLogo', result.scanStatus.THREATFOX);
+            updateLogoState('virusTotalLogo', result.scanStatus.VIRUSTOTAL);
+            updateLogoState('wapitiLogo', result.scanStatus.WAPITI);
+
+            // Handle CSA logo independently
+            const csaLogoContainer = document.getElementById('csaLogoContainer');
+            if (result.scanStatus.CSA) {
+                csaLogoContainer.innerHTML = '<img src="static/CSA_Trusted_Cloud_Provider_badge.svg" alt="CSA Trusted Cloud Provider" style="width: 120px; height: auto;">';
+                csaLogoContainer.style.visibility = 'visible';
+            } else {
+                csaLogoContainer.innerHTML = '';
+                csaLogoContainer.style.visibility = 'hidden';
             }
 
-            const data = { domain: domain };
-            if (companyName) data.companyName = companyName;
-
-            showLoading();
-            document.getElementById("scanLogos").style.visibility = "hidden"; // Hide logos initially
-
-            fetch('/scan', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(response => response.json())
-            .then(result => {
-                hideLoading();
-                scanResults = result.scanDetails;
-
-                // Display score
-                displayScore(result.scanScore);
-
-                // Show logos and update based on scanStatus
-                document.getElementById("scanLogos").style.visibility = "visible";
-                updateLogoState('hibpLogo', result.scanStatus.HIBP);
-                updateLogoState('cmsLogo', result.scanStatus.CMS);
-                updateLogoState('malwareLogo', result.scanStatus.MALWARE);
-                updateLogoState('openPortsLogo', result.scanStatus.OPEN_PORTS);
-                updateLogoState('threatFoxLogo', result.scanStatus.THREATFOX);
-                updateLogoState('virusTotalLogo', result.scanStatus.VIRUSTOTAL);
-                updateLogoState('wapitiLogo', result.scanStatus.WAPITI);
-
-                // Show CSA and VISA logos for enterprise scan if conditions are met
-                if (scanType === 'enterprise') {
-                    document.getElementById('csaLogos').style.display = result.scanStatus.CSA ? 'flex' : 'none';
-                    document.getElementById('visaLogoContainer').style.display = result.scanStatus.VISA ? 'block' : 'none';
-                } else {
-                    // Hide CSA and VISA logos for standard scan
-                    document.getElementById('csaLogos').style.display = 'none';
-                    document.getElementById('visaLogoContainer').style.display = 'none';
-                }
-
-                // Update map location
-                displayMap(domain);
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                hideLoading();
-            });
-        }
+            // Handle VISA logo independently
+            const visaLogoContainer = document.getElementById('visaLogoContainer');
+            if (result.scanStatus.VISA) {
+                visaLogoContainer.innerHTML = '<img src="static/visa.png" alt="VISA" style="width: 120px; height: auto;">';
+                visaLogoContainer.style.visibility = 'visible';
+            } else {
+                visaLogoContainer.innerHTML = '';
+                visaLogoContainer.style.visibility = 'hidden';
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            hideLoading();
+        });
+}
 
         function displayScore(score) {
             const scoreCircle = document.getElementById('scoreCircle');

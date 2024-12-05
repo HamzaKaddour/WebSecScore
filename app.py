@@ -10,6 +10,7 @@ def index():
 @app.route('/scan', methods=['POST'])
 def scan():
     data = request.json
+
     domain = data.get("domain")
     company_name = data.get("companyName") if data.get("companyName") else None
 
@@ -22,4 +23,4 @@ def scan():
     return jsonify(result), 200
 
 if __name__ == '__main__':
-     app.run(host='0.0.0.0', port=5000, debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
