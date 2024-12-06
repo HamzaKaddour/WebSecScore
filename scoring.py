@@ -7,6 +7,7 @@ from Tests import vul_wapiti as VUL
 from Tests import whatcms as CMS
 from Tests import csa as CSA
 from Tests import visa_pci as VISA
+import database as db
 
 # from WebSecScore.Tests import 
 import requests
@@ -128,12 +129,22 @@ def mainScanner(domain, companyName = None):
             
     }
     
-    testRes = testingDomainResults(domain, companyName)
-    testScore = scoreResults(testRes[0])
+    if db.checkDomainExists(domain):
+        scanResults = db.getDomainScanResults(domain)
+        result["scanScore"] = scanResults["score"]
+        result["scanStatus"] = scanResults["scanStatus"]
+        result["scanDetails"] = scanResults
     
-    result["scanDetails"], result["scanStatus"] = testRes
-    result["scanScore"] = testScore
+    else:
+    
+        testRes = testingDomainResults(domain, companyName)
+        testScore = scoreResults(testRes[0])
+        
+        result["scanDetails"], result["scanStatus"] = testRes
+        result["scanScore"] = testScore
+        
+        db.InsertUpdate(domain, result, companyName)
     
     return result
 
-mainScanner("google.com")
+# mainScanner("google.com", "amazon")
