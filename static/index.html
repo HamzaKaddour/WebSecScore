@@ -459,13 +459,89 @@
 //         });
 // }
 
+const companyNameRegex = /^[a-zA-Z0-9\s-]+$/;
+const domainRegex = /^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}?$/;
+
+
+// function runScan() {
+//     const scanType = document.getElementById('scan-type').value;
+//     const domain = document.getElementById('domain').value;
+//     const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
+
+//     if (!domain) {
+//         alert("Please enter a domain.");
+//         return;
+//     }
+
+//     const data = { domain: domain };
+//     if (companyName) data.companyName = companyName;
+
+//     showLoading();
+
+//     fetch('/scan', {
+//         method: 'POST',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify(data)
+//     })
+//         .then(response => response.json())
+//         .then(result => {
+//             hideLoading();
+//             scanResults = result.scanDetails;
+
+//             // Display score and map
+//             displayScore(result.scanScore);
+//             displayMap(domain);
+
+//             // Update general scan logos
+//             document.getElementById("scanLogos").style.visibility = "visible";
+//             updateLogoState('hibpLogo', result.scanStatus.HIBP);
+//             updateLogoState('cmsLogo', result.scanStatus.CMS);
+//             updateLogoState('malwareLogo', result.scanStatus.MALWARE);
+//             updateLogoState('openPortsLogo', result.scanStatus.OPEN_PORTS);
+//             updateLogoState('threatFoxLogo', result.scanStatus.THREATFOX);
+//             updateLogoState('virusTotalLogo', result.scanStatus.VIRUSTOTAL);
+//             updateLogoState('wapitiLogo', result.scanStatus.WAPITI);
+
+//             // Handle CSA logo independently
+//             const csaLogoContainer = document.getElementById('csaLogoContainer');
+//             if (result.scanStatus.CSA) {
+//                 csaLogoContainer.innerHTML = '<img src="static/CSA_Trusted_Cloud_Provider_badge.svg" alt="CSA Trusted Cloud Provider" style="width: 120px; height: auto;">';
+//                 csaLogoContainer.style.visibility = 'visible';
+//             } else {
+//                 csaLogoContainer.innerHTML = '';
+//                 csaLogoContainer.style.visibility = 'hidden';
+//             }
+
+//             // Handle VISA logo independently
+//             const visaLogoContainer = document.getElementById('visaLogoContainer');
+//             if (result.scanStatus.VISA) {
+//                 visaLogoContainer.innerHTML = '<img src="static/visa.png" alt="VISA" style="width: 120px; height: auto;">';
+//                 visaLogoContainer.style.visibility = 'visible';
+//             } else {
+//                 visaLogoContainer.innerHTML = '';
+//                 visaLogoContainer.style.visibility = 'hidden';
+//             }
+//         })
+//         .catch(error => {
+//             console.error("Error:", error);
+//             hideLoading();
+//         });
+// }
+
 function runScan() {
     const scanType = document.getElementById('scan-type').value;
-    const domain = document.getElementById('domain').value;
-    const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value : null;
+    const domain = document.getElementById('domain').value.trim();
+    const companyName = scanType === 'enterprise' ? document.getElementById('company-name').value.trim() : null;
 
-    if (!domain) {
-        alert("Please enter a domain.");
+    // Validate the domain using domainRegex
+    if (!domainRegex.test(domain)) {
+        alert("Please enter a valid domain.");
+        return;
+    }
+
+    // Validate the company name if it is an enterprise scan
+    if (scanType === 'enterprise' && (!companyName || !companyNameRegex.test(companyName))) {
+        alert("Please enter a valid company name (letters, numbers, spaces, and hyphens only).");
         return;
     }
 
@@ -523,6 +599,8 @@ function runScan() {
             hideLoading();
         });
 }
+
+
 
         function displayScore(score) {
             const scoreCircle = document.getElementById('scoreCircle');
