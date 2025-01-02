@@ -1,5 +1,5 @@
 # WebSecScore
-Scoring Web applications security level.
+Comprehensive web application security testing tool designed to assess the security level of web domains. Subsequently, I will be implementing security tests and using some available APIs to calculate a security score for the input domain(s) and fetching the results on a web page. The project will focus on two distinct types of domains: personal domains and corporate domains. The tool will offer a suite of security tests, ensuring that personal web applications are rigorously tested for common vulnerabilities, while corporate domains will undergo additional enterprise-level tests that include compliance checks.
 
 
 # Running the app
